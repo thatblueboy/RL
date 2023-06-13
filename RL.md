@@ -6,6 +6,11 @@
 2. [The RL Agent](#the-rl-agent)
 2. [Problems within Reinforcement Learning](#problems-within-reinforcement-learning)
 2. [Markov Decision Process ](#markov-decision-process)
+2. [Monte-Carlo Reinforcement Learning](#monte-carlo-reinforcement-learning)
+2. [Temporal Difference Learning](#temporal-difference-learning)
+4. [Function Approximation](#function-approximation)
+5. [Policy Gradient](#policy-gradient)
+
 
 <br>
 <br>
@@ -211,7 +216,7 @@ A --> C[Planning: Model of the environment is kwown, agent performs computations
 
 ### State Transition Matrix
 State Transition Probability:
-$$\mathcal{P}_{ss'} = \mathbb{P}[S' = s' | S=s, A=a]$$
+$$\mathcal{P}_{ss'} = \mathbb{P}[S' = s' | S=s]$$
 State Transition Matrix $\mathcal
 {P}$ defines transition probabilities from all states s to all successor states s', 
 $$ \mathcal{P}=from(columns), to (rows) \begin{bmatrix}
@@ -227,7 +232,7 @@ A Markov process is a memoryless random process, i.e. a sequence of random state
 > **Def<sup>n</sup>** *Markov Process* (or *Markov Chain*) is a tuple $\langle \mathcal{S}, \mathcal{P}\rangle$
 > - $\mathcal{S}$ is a finite set of states
 > - $\mathcal{P}$ is a state transition probability matrix, 
-> $$\mathcal{P}_{ss'} = \mathbb{P}[S' = s' | S=s, A=a]$$
+> $$\mathcal{P}_{ss'} = \mathbb{P}[S' = s' | S=s]$$
 
 <br>
 
@@ -235,14 +240,14 @@ A Markov process is a memoryless random process, i.e. a sequence of random state
 > **Def<sup>n</sup>** *Markov Reward Process* is a tuple $\langle \mathcal{S}, \mathcal{P}, \mathcal{R}, \gamma \rangle$
 > - $\mathcal{S}$ is a finite set of states
 > - $\mathcal{P}$ is a state transition probability matrix, 
-> $$\mathcal{P}_{ss'} = \mathbb{P}[S' = s' | S=s, A=a]$$
-> - $\mathcal{R}$ i s a reward function, 
+> $$\mathcal{P}_{ss'} = \mathbb{P}[S' = s' | S=s]$$
+> - $\mathcal{R}$ is a reward function, 
 > $$ \mathcal{R}_{s} = \mathbb{E}[R_{t+1}|S_{t}= s]$$
 > - $\gamma$ is a discount function, $\gamma \in [0, 1]$
 
 <br>
 
-### Reward
+### Return
 
 > **Def<sup>n</sup>** Return $G_{t}$ is the total reward from time-step t 
 > $$G_{t}=R_{t+1}+\gamma R_{t+2}\ldots =\sum ^{\infty }_{k=0}\gamma ^{k}R_{t+k+1}$$
@@ -252,7 +257,7 @@ A Markov process is a memoryless random process, i.e. a sequence of random state
 
 ### Why discount?
 - Uncertainty: We do not have a perfect model, we dont want to trust the future too much.
-- Mathematically convinient 
+- Mathematically convenient 
 - Avoids infinite returns
 - Uncertainty about the future may not be fully represented 
 - If the reward is finantial, immdiate rewards may earn more interest than delayed rewards
@@ -261,19 +266,18 @@ A Markov process is a memoryless random process, i.e. a sequence of random state
 <br>
 
 ### Value Function
-- The value function v(s) gives the longn term values of state s
+- The value function v(s) gives the long-term values of state s
 > **Def<sup>n</sup>**  The *value function v(s)* of an MRP is the expected return starting from state s
 > $$v(s) = \mathbb{E}[G_{t}|S_{t} = s]$$
- - How to calculate? Takes multiple samples from the Markov process, find discount reward for each sample(episode) anad then take average.
+ - How to calculate? Take multiple samples from the Markov process, find discount reward for each sample(episode) anad then take average.
 
 <br>
 
 ### Bellman Equantion
-- The value function can be decomposed into summation of immediate reward($R_{t+1}$) and value of succesor state $\gamma$ $v(S_{t+1})$
+The value function can be decomposed into summation of immediate reward($R_{t+1}$) and value of succesor state $\gamma$ $v(S_{t+1})$
 $$ \begin{align*} v(s) &= \mathbb{E}[G_{t}| S_{t} = s]\\ &=\mathbb{E}[R_{t+1}+\gamma R_{t+2}\ + \gamma^{2} R_{t+3} + \ldots | S_{t} = s]\\&= \mathbb{E}[R_{t+1}+\gamma R_{t+2}\ + \gamma^{2} R_{t+3} + \ldots | S_{t} = s]\\ & = \mathbb{E}[R_{t+1}+\gamma(R_{t+2}\ + \gamma R_{t+3} + \ldots )| S_{t} = s]\\ &= \mathbb{E}[R_{t+1}+\gamma G_{t+1}| S_{t} = s] \end{align*}$$
 
-
-### In Matrix Form
+In Matrix Form,
 $$ \begin{bmatrix}\ v(1)\\\vdots\\v(n)\end{bmatrix} = \begin{bmatrix} \mathcal{R}_{1}\\ \vdots \\ \mathcal{R}_{n} \end{bmatrix}+\gamma\begin{bmatrix}
 \mathcal{P}_{11} & \ldots  & \mathcal{P}_{1n} \\\vdots && \vdots\\
 \mathcal{P}_{n1}, & \ldots  & \mathcal{P}_{nn}
@@ -297,7 +301,7 @@ $$\begin{align*}v &=  \mathcal{R} + \gamma \mathcal{P}v\\ v(1 - \gamma \mathcal{
 >- $\mathcal{S}$ is a finite set of states
 >- $\mathcal{A}$ is a finite set of actions
 >- $\mathcal{P}_{ss'}^{a} = \mathbb{P}[S_{t+1} = s' | S_{t}=s, A_{t}=a]$
->- \mathcal{R} is a reward function $ \mathcal{R}_{s}^{a} = \mathbb{E}[R_{t+1}|S_{t}= s, A_{t} = a]$
+>- $\mathcal{R}$ is a reward function $ \mathcal{R}_{s}^{a} = \mathbb{E}[R_{t+1}|S_{t}= s, A_{t} = a]$
 >- $\gamma$ is a discount factor $\gamma \in [0, 1]$
 
 <br>
@@ -325,7 +329,7 @@ How good a state is
 ### Action value Function
 How good an action is
 > **Def<sup>n</sup>** The *action-value* function 
-> $$q_{\pi}(s, a) = \mathbb{E}[G_t|S_t=s, A_t = a]$$
+> $$q_{\pi}(s, a) = \mathbb{E}_{\pi}[G_t|S_t=s, A_t = a]$$
 
 <br>
 
@@ -349,14 +353,119 @@ both together gives,
 
 $$v_{\pi}(s) = \sum_{a' \in \mathcal{A}}\pi(a|s)(\mathcal{R}_s^{a}+ \gamma \sum_{s' \in \mathcal{S}}\mathcal{P}_{ss'}^{a}\sum_{a' \in \mathcal{A}}\pi(a|s)q_{\pi}(s', a')$$
 
+<br>
 
 ### Optimal Value Function
 
-> **Def<sup>n</sup>** The *optimal state* 
+> **Def<sup>n</sup>** The *optimal state-value* function $v_{*}(s)$ is the maximum value function over all policies
+> $$v_{*}(s) = \underset{\pi}{max} v_{\pi}(s)$$
+> **Def<sup>n</sup>** The *optimal action-value* function $q_{*}(s, a)$ is the maximum action-value function over all policies
+> $$q_{*}(s, a) = \underset{\pi}{max} q_{\pi}(s, a)$$
+
+*An MDP is said to be solved when we know the optimal functions and the corresponding policy*
+
+<br>
+
+### Optimal Policy
+> **Theorum** For any MDP
+> - There exists an optimal policy $\pi_{*}$ that is better than or equal to all other policies, $\pi_{*} \geq \pi, \forall \pi$
+> - All optimal policies achieve the optimal value function, $v_{\pi_{*}}(s) = v_{*}(s)$
+> - All optimal policies achieve the optimal action-value function, $q_{\pi_{*}}(s, a) = q_{*}(s, a)$
+
+A policy $\pi$ is better than or equal to a policy $\pi'$ if its expected return is greater than or equal to that of $\pi'$ for all states. $\pi \geq \pi'$ if $v_{\pi}(s) \geq v_{\pi'}(s), \forall s \in \mathcal{S}$
+
+<br>
+
+### Optimal Policy if $q_{*}$ is known
+
+$$\pi_{*} (a|s)= \begin{cases}
+1 & \text{ if a = $\underset{a \in \mathcal{A}}{\operatorname{argmax}}$ $q_{*}$ (s, a)}\\
+0 & \text{otherwise} \\
+\end{cases}$$
+- There is always a deterministic optimal policy for any MDP (??)
+
+<br>
+
+### Bellman optimality equation for $v_{*}$
+$$v_{*}(s) = \underset{a \in \mathcal{A}}{max} q_{*}(s, a)$$
+
+<br>
+
+### Bellman optimality equation for $q_{*}$
+
+$$ q_{*}(s, a) = \mathcal{R}_{s}^{a} + \gamma \sum_{s' \in \mathcal{S}}\mathcal{P}_{ss'}^{a}v_{*}(s')$$
+
+<br>
+
+### Bellman Optimality equation for $v_{*} (2)$
+
+$$v_{*}(s) = \underset{a}{max} \mathcal{R}_{s}^{a} + \gamma \sum_{s' \in S} \mathcal{P}_{ss'}^{a} v{*}(s') $$
+
+<br>
+
+### Bellman Optimality equation for $q_{*} (2)$
+
+$$q_{*}(s, a) = \mathcal{R}_{s}^{a} + \gamma \sum_{s' \in S} \mathcal{P}_{ss'}^{a} \underset{a'}{max} q_{*}(s', a') $$
+
+<br>
+
+### Solving Bellman Optimality equation
+Bellman Optimality Equation is non-linear, no closed form solution in general. Many iterative solution methods, like value iterationm policy iteration, Q-learning, Sarsa etc. exist.
+
+<br>
+
+### Partially Observable MDPs (POMDPs)
+
+> **Def<sup>n</sup>** *Partially Observable MDPs* (POMDPs) is a tuple $\langle \mathcal{S}, \mathcal{A}, \mathcal{P}, \mathcal{R}, \mathcal{O}, \mathcal{Z}, \gamma \rangle$
+> - $\mathcal{S}$ is a finite set of states
+> - $\mathcal{A}$ is a finite set of actions
+> - $\mathcal{P}_{ss'}^{a} = \mathbb{P}[S_{t+1} = s' | S_{t}=s, A_{t}=a]$
+> - $\mathcal{R}$ is a reward function $ \mathcal{R}_{s}^{a} = \mathbb{E}[R_{t+1}|S_{t}= s, A_{t} = a]$
+> - $\mathcal{O}$ is a finite set of observations
+> - $\mathcal{Z}_{s}^{a} = \mathbb{P}[O_{t} = o| S_{t} = s, A_{t} = a]$
+> - $\gamma$ is a discount factor $\gamma \in [0, 1]$
+
+
+<br>
+
+### Belief State
+
+> **Def<sup>n</sup>** *history* $H_{t}$ is the sequence of actions, observations, rewards till time t
+> $$H_{t} = A_{1}, O_{1}, R_{1}, \ldots, A_{t}, O_{t}, R_{t}$$
+
+> **Def<sup>n</sup>** *Belief State* $b$ is a probability distribution over states,
+> $$b(s) = \mathbb{P}[S_{t} = s| H_{t}]$$
+
+history and belief state are Markov, i.e. $H_{t} \rightarrow S_{t} \rightarrow H_{t+1}$ and $b_{t} \rightarrow S_{t} \rightarrow b_{t+1}$
+<br> A POMDP can be reduced to an (infinite) history or belief state tree. (??)
+
+<br>
+
+### Ergodic Markov Process:
+An ergodic Markov process is:
+- Recurrent: each state is visited an infinite number of times
+- Aperiodic: each state is visited without any systematic period
+
+> **Theorum** An ergodic Markov process has limting stationary distribution $d_{\pi}(s)$ with the property 
+> $$d_{\pi}(s) = \sum_{s' \in \mathcal{S}} d_{\pi}(s') \mathcal{P}_{s's}^{a}$$
+
+limiting means after almost infinite steps
+
+<br>
+
+### Ergodic MDPs:
+
+> **Theorum** An MDP is if the Markov chain induced by any policy is ergodic.
+
+For any policy $\pi$, an ergodic MDP has an average reward per time-step $ \rho^{\pi} = \underset{T \rarr \infin}{lim} \frac{1}{T} \mathbb{E}  [ \sum_{t=1}^{T} R_{t} ]$
+
+Average Reward Value Function <br> $v_{\pi}(s) = \mathbb{E} \Big[ \sum_{k=1}^{\infin} (R_{t+k} - \rho^{\pi})|S_{1} = s \Big]$
+
+<br>
 
 ---
 
-### **Monte-Carlo Reinforcement Learing**
+### **Monte-Carlo Reinforcement Learning**
 
 *Goal:  To learn $v_{\pi}$ online from experience under policy $\pi$*
 
@@ -645,7 +754,7 @@ note: update would now have to at end of episode
 <br>
 
 ---
-### Function Approximation
+### **Function Approximation**
 
 Main Idea: Instead of having a look up table for V(s), we find/update a function $ s \rarr V(s) $, 
 $$ \hat{v}(s, \bold{w})  = v_{\pi}(s) $$
@@ -656,14 +765,15 @@ where ***w*** is the weight vector
 
 ---
 
-### Policy Gradient
+### **Policy Gradient**
 
 - Optimize the policy directly
 - $ \pi_{\theta} = \mathbb{P}[a|s, \theta]$
 - model-free
+
 <br>
 
-#### Why policy based over value-based?
+### Why policy based over value-based?
 - Better convergence properties 
 - Effective in high-dimension or continuous action spaces
 -can learn stochastic policies
@@ -671,36 +781,38 @@ where ***w*** is the weight vector
 > Why stochastic policy ?
 > Think about games like rock-paper-scissors, aliased gridworld
 
+<br>
 
-***doubt*** why use stationary distribution for continuing evironments but not episodic environments? perhaps because there is no start or end to continuing environments, so we cant use the start state value function.
+### Objective Function
+Used to measure the quality of a policy $\pi_{\theta}(s, a)$
 
-#### How do we measure the quality of a policy $\pi_{\theta}(s, a)$?
-
-1. for episodic environments, we can use the start state value function, 
-$$J_{1}(\theta) = v_{\pi_{\theta}}(s_{1})$$
+$$J_{\pi_{\theta}} = \mathbb{E}_{\pi \sim \tau} (G_{\tau})$$
+*expected return over trajectory $\tau$ produced by policy $\pi$*
+$$\tau = ( s_{1}, a_{1}, s_{2}....a_{t+1}) $$
+1. For episodic environments, we can use the start state value function, 
+$$J_{1}(\theta) = V_{\pi_{\theta}}(s_{1})$$
 2. For continuing environments, we can use the the average value,
 $$J_{avV}(\theta) = \sum_{s \in \mathcal{S}} d^{\pi_{\theta}}(s) V^{\pi_{\theta}}(s)$$
 3. or average reward per time step,
 $$J_{avR}(\theta) = \sum_{s \in \mathcal{S}} d^{\pi_{\theta}}(s) \sum_{a \in \mathcal{A}} \pi_{\theta}(a|s) \mathcal{R}_{s}^{a}$$
 where $d^{\pi_{\theta}}(s)$ is the stationary distribution of the MDP under policy $\pi_{\theta}$
 
-This J() is called the objective function
+<br>
 
-#### Policy Optimisation
+### Policy Optimisation
 
-Policy based reinforcement learning is an optimization problem, involving finding $\theta $ that maximizes $J(\theta)$
+Policy based reinforcement learning is an optimization problem, involving finding $\theta $ that maximizes $J(\theta)$.
+We search for the local maxima for $J(\theta)$ using gradient ascent, using update, 
+$$\theta \larr \theta + \alpha \cdot \underbrace{\nabla_{\theta} J(\theta)}_{\text{policy gradient}}$$
 
-Policy gradient algorithms search for the local maxima for $J(\theta)$ using gradient ascent, using update, 
-$$\theta \larr \theta + \alpha \nabla_{\theta} J(\theta)$$
-where $\nabla_{\theta} J(\theta)$ is the policy gradient,
 $$\nabla_{\theta} J(\theta) = \begin{pmatrix} \frac{\partial J(\theta)}{\partial \theta_{1}} \\ \vdots \\ \frac{\partial J(\theta)}{\partial \theta_n} \end{pmatrix}$$
 
 <br>
 
-#### Computing gradients using Finite Differences
+<!-- #### Computing gradients using Finite Differences
  ***doubt: what next?***
  perturb theta by small amount
-$$ \frac{ J(\theta)}{\partial \theta} \approx \frac{J(\theta + \epsilon u_{k})-J(\theta)}{\epsilon} $$
+$$ \frac{ J(\theta)}{\partial \theta} \approx \frac{J(\theta + \epsilon u_{k})-J(\theta)}{\epsilon} $$ -->
 
 <br>
 
@@ -713,37 +825,70 @@ $$ \begin{align*} \nabla_{\theta} \pi_{\theta} (s, a) &= \pi_{\theta}(s, a) \fra
 
 <br>
 
-### Softmax Policy
+### Score Function for some common policies
 
+**1. Softmax Policy**<br>
 weight actions using linear combination of features $ \phi (s, a)^{\intercal} \theta$ <br>
-Probability of action is proporitonal to exponentiated weight, 
-$$\pi_{\theta}(s, a) \propto e^{\phi(s, a)^{\intercal}\theta} $$
-
-### Score Function for Softmax Policy
+Probability of action is proporitonal to exponentiated weight, $$\pi_{\theta}(s, a) \propto e^{\phi(s, a)^{\intercal}\theta} $$  Score Function for Softmax Policy
 
 $$ \nabla_{\theta} log \pi_{\theta}(s, a) = \phi(s, a) - \mathbb{E}_{\pi_{\theta}}[\phi (s, .)]$$
  
- <br>
 
-### Gaussian Policy
-
+**2.  Gaussian Policy** 
 - mean is a linear combination of state features $ \mu(s) = \phi(s)^{\intercal} \theta$
 - variance fixed, or may be parameterised.
-- policy is Gaussian, $$ a \sim \mathcal{N}(\mu(s), \sigma^{2})$$
-
-### Score Function for Gaussian Policy
+- policy is Gaussian, $$ a \sim \mathcal{N}(\mu(s), \sigma^{2})$$ Score Function for Gaussian Policy
 
 $$ \nabla_{\theta} log \pi_{\theta}(s, a) = \frac{(a - \mu(s))\phi(s)}{\sigma^{2}}$$
 
 <br>
 
-### Policy Gradient Theorum
+### Policy Gradient Theorum - Deriving the Policy Gradient-1
+
+**to do**
 
 > **Theorum** For any differentiable policy $\pi_{\theta}(s, a)$, <br>
 > for any of the policy objective functions $J = J_{1}$ , $J_{avR}$ or $\frac{1}{1-\lambda} J_{avV}$, the policy gradient is <br>
-> $$\nabla_{\theta} J(\theta) = \mathbb{E}_{\pi_{\theta}}[\nabla_{\theta} log \pi_{\theta}(s, a)Q^{\pi_{\theta}}(s, a)]$$
+> $$\nabla_{\theta} J(\theta) = \mathbb{E}_{\pi_{\theta}}[\nabla_{\theta} log \pi_{\theta}(a|s)Q^{\pi_{\theta}}(a, s)]$$
 
 <br>
+
+### Deriving the Policy Gradient-2
+
+$$\begin{align*} \nabla_{\theta} J(\pi_{\theta}) &= \nabla_{\theta} \underset{\tau \sim \pi_{\theta}}{E}[G(\tau)] \\ &= \nabla_{\theta} \int_{\tau} P(\tau|\theta)G(\tau) \\ &= \int_{\tau} \nabla_{\theta} P(\tau | \theta) G(\tau) \\ &=\int_{\tau} P(\tau|\theta)\nabla_{\theta}logP(\tau|\theta)G(\tau) \\ &= \underset{\tau \sim \pi_{\theta}}{E} [\nabla_{\theta} log P(\tau|\theta)G(\tau)] \\ &= \underset{\tau \sim \pi_{\theta}}{E} \bigg[ \sum_{t=0}^{T}\nabla_{\theta} log \pi_{\theta}(a_{t}|s_{t}) G(\tau) \bigg]\end{align*}$$
+
+<br>
+
+### Calculating the Policy Gradient
+If we have $\mathcal{D}$ samples of trajectories from episodes, we can estimate the policy gradient as,
+$$\nabla_{\theta} J(\theta) \approx \frac{1}{|\mathcal{D}|} \sum_{\tau \in \mathcal{D}} \sum_{t=0}^{T} \nabla_{\theta} log \pi_{\theta}(a_{t}|s_{t}) G(\tau)$$
+
+<br>
+
+### Expected Grad-Log-Prob Lemma
+
+$$\begin{align*} &\int_{x} P_{\theta} (x) \\ \nabla_{\theta} &\int_{x} P_{\theta}(x) = \nabla_{\theta}1 = 0  \\ 0 &= \nabla_{\theta} \int_{x} P_{\theta}(x) \\  &= \int_{x} \nabla_{\theta} P_{\theta}(x) \\ &= \int_{x} P_{\theta}(x) \nabla_{\theta}logP_{\theta}(x) \\ \implies &0 = \underset{x \sim P_{\theta}}{E}\nabla log P_{\theta}(x) \end{align*}$$
+
+### Reward-to-go Policy Gradient
+
+$$ \begin{align*} &\underset{\tau \sim \pi_{\theta}}{E} \bigg[ \sum_{t=0}^{T}\nabla_{\theta} log \pi_{\theta}(a_{t}|s_{t}) G(\tau) \bigg] \\ &= \underset{\tau \sim \pi_{\theta}}{\mathbb{E}} \bigg[ \sum_{t=0}^{T} \nabla_{\theta}log \pi_{\theta}(a_{t}|s_{t}) \cdot \sum_{t'=0}^{T}r_{t} \bigg] \\ &= \sum_{t=0}^{T}\underset{\tau \sim \pi_{\theta}}{\mathbb{E}} \bigg[  \nabla_{\theta}log \pi_{\theta}(a_{t}|s_{t}) \cdot \sum_{t'=0}^{T}r_{t} \bigg] \\ &= \sum_{t=0}^{\tau} \underset{\tau \sim \pi_{\theta}}{\mathbb{E}} \bigg[\nabla_{\theta}log \pi_{\theta}(a_{t}|s_{t})  \bigg[\sum_{t'=0}^{t-1}r_{t} + \sum_{t'=t}^{T} r_{t}\bigg]\bigg]\\&= \sum_{t=0}^{\tau} \bigg[ \underset{\tau \sim \pi_{\theta}}{\mathbb{E}}\bigg[\nabla_{\theta}log \pi_{\theta}(a_{t}|s_{t})  \sum_{t'=0}^{t-1}r_{t} \bigg] + \underset{\tau \sim \pi_{\theta}}{\mathbb{E}}\bigg[\nabla_{\theta}log \pi_{\theta}(a_{t}|s_{t})  \sum_{t'=t}^{T} r_{t}\bigg] \bigg] \\&= \sum_{t=0}^{\tau} \bigg[ \underset{\tau \sim \pi_{\theta}}{\mathbb{E}}\bigg[\nabla_{\theta}log \pi_{\theta}(a_{t}|s_{t}) \bigg] \cdot \underset{\tau \in \pi_{\theta}}{\mathbb{E}}\bigg[ \sum_{t'=0}^{t-1}r_{t} \bigg] + \underset{\tau \sim \pi_{\theta}}{\mathbb{E}}\bigg[\nabla_{\theta}log \pi_{\theta}(a_{t}|s_{t})  \sum_{t'=t}^{T} r_{t}\bigg] \bigg] \\ &\because \text{current action is independtent of previous states} \\&= \sum_{t=0}^{\tau} \bigg[ \underbrace{\underset{\tau \sim \pi_{\theta}}{\mathbb{E}}\bigg[\nabla_{\theta}log \pi_{\theta}(a_{t}|s_{t}) \bigg]}_{= 0 \because \
+text{grad-log-prob lemma}} \cdot \underset{\tau \in \pi_{\theta}}{\mathbb{E}}\bigg[ \sum_{t'=0}^{t-1}r_{t} \bigg] + \underset{\tau \sim \pi_{\theta}}{\mathbb{E}}\bigg[\nabla_{\theta}log \pi_{\theta}(a_{t}|s_{t})  \sum_{t'=t}^{T} r_{t}\bigg] \bigg]\\ &=\underset{\tau \sim \pi_{\theta}}{E} \bigg[ \sum_{t=0}^{T}\nabla_{\theta} log \pi_{\theta}(a_{t}|s_{t}) \sum_{t'=t}^{T}r_{t} \bigg]  \end{align*} $$
+
+<br>
+
+### Baselines
+
+for any function b, 'baseline' depending only on state
+$$\underset{a_t \in \pi_{\theta}}{E} \bigg[ \nabla_{\theta} log \pi_{\theta}(a_{t}|s_{t}) \cdot b(s_{t})) \bigg]$$
+
+$$\implies \nabla_{\theta}J(\pi_{\theta}) = \underset{\tau \in \pi}{E}\bigg[ \sum_{t=0}^{T} \nabla_{\theta} log \pi_{\theta}(a_{t}|s_{t})\bigg(\sum_{t' = t}^{T}r_{t} - b(s_{t})\bigg) \bigg]$$
+
+common choice of baseline $\rarr \text{value function, } V_{\pi}(s_{t})$ 
+
+Most commonly Value function is approximated by a neural network and updated concurrently with policy with loss as 
+$$\phi_{k} = \underset{\phi}{argmin} \underset{s_{t}, R_{t} \sim \pi_{k}}{E} \bigg[ \bigg( V_{\phi} - \hat{R_{t}}\bigg)^{2}\bigg]$$
+<br>
+
 
 ### REINFORCE
 
@@ -758,4 +903,5 @@ $$ \nabla_{\theta} log \pi_{\theta}(s, a) = \frac{(a - \mu(s))\phi(s)}{\sigma^{2
 *here, $v_{t}$ is used as an unbaised estimator for $Q^{\pi \theta}(s_{t}, a_{t})$*
 
 <br>
+
 
