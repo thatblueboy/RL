@@ -871,8 +871,7 @@ $$\begin{align*} &\int_{x} P_{\theta} (x) \\ \nabla_{\theta} &\int_{x} P_{\theta
 
 ### Reward-to-go Policy Gradient
 
-$$ \begin{align*} &\underset{\tau \sim \pi_{\theta}}{E} \bigg[ \sum_{t=0}^{T}\nabla_{\theta} log \pi_{\theta}(a_{t}|s_{t}) G(\tau) \bigg] \\ &= \underset{\tau \sim \pi_{\theta}}{\mathbb{E}} \bigg[ \sum_{t=0}^{T} \nabla_{\theta}log \pi_{\theta}(a_{t}|s_{t}) \cdot \sum_{t'=0}^{T}r_{t} \bigg] \\ &= \sum_{t=0}^{T}\underset{\tau \sim \pi_{\theta}}{\mathbb{E}} \bigg[  \nabla_{\theta}log \pi_{\theta}(a_{t}|s_{t}) \cdot \sum_{t'=0}^{T}r_{t} \bigg] \\ &= \sum_{t=0}^{\tau} \underset{\tau \sim \pi_{\theta}}{\mathbb{E}} \bigg[\nabla_{\theta}log \pi_{\theta}(a_{t}|s_{t})  \bigg[\sum_{t'=0}^{t-1}r_{t} + \sum_{t'=t}^{T} r_{t}\bigg]\bigg]\\&= \sum_{t=0}^{\tau} \bigg[ \underset{\tau \sim \pi_{\theta}}{\mathbb{E}}\bigg[\nabla_{\theta}log \pi_{\theta}(a_{t}|s_{t})  \sum_{t'=0}^{t-1}r_{t} \bigg] + \underset{\tau \sim \pi_{\theta}}{\mathbb{E}}\bigg[\nabla_{\theta}log \pi_{\theta}(a_{t}|s_{t})  \sum_{t'=t}^{T} r_{t}\bigg] \bigg] \\&= \sum_{t=0}^{\tau} \bigg[ \underset{\tau \sim \pi_{\theta}}{\mathbb{E}}\bigg[\nabla_{\theta}log \pi_{\theta}(a_{t}|s_{t}) \bigg] \cdot \underset{\tau \in \pi_{\theta}}{\mathbb{E}}\bigg[ \sum_{t'=0}^{t-1}r_{t} \bigg] + \underset{\tau \sim \pi_{\theta}}{\mathbb{E}}\bigg[\nabla_{\theta}log \pi_{\theta}(a_{t}|s_{t})  \sum_{t'=t}^{T} r_{t}\bigg] \bigg] \\ &\because \text{current action is independtent of previous states} \\&= \sum_{t=0}^{\tau} \bigg[ \underbrace{\underset{\tau \sim \pi_{\theta}}{\mathbb{E}}\bigg[\nabla_{\theta}log \pi_{\theta}(a_{t}|s_{t}) \bigg]}_{= 0 \because \
-text{grad-log-prob lemma}} \cdot \underset{\tau \in \pi_{\theta}}{\mathbb{E}}\bigg[ \sum_{t'=0}^{t-1}r_{t} \bigg] + \underset{\tau \sim \pi_{\theta}}{\mathbb{E}}\bigg[\nabla_{\theta}log \pi_{\theta}(a_{t}|s_{t})  \sum_{t'=t}^{T} r_{t}\bigg] \bigg]\\ &=\underset{\tau \sim \pi_{\theta}}{E} \bigg[ \sum_{t=0}^{T}\nabla_{\theta} log \pi_{\theta}(a_{t}|s_{t}) \sum_{t'=t}^{T}r_{t} \bigg]  \end{align*} $$
+$$ \begin{align*} &\underset{\tau \sim \pi_{\theta}}{E} \bigg[ \sum_{t=0}^{T}\nabla_{\theta} log \pi_{\theta}(a_{t}|s_{t}) G(\tau) \bigg] \\ &= \underset{\tau \sim \pi_{\theta}}{\mathbb{E}} \bigg[ \sum_{t=0}^{T} \nabla_{\theta}log \pi_{\theta}(a_{t}|s_{t}) \cdot \sum_{t'=0}^{T}R_{t} \bigg] \\ &= \sum_{t=0}^{T}\underset{\tau \sim \pi_{\theta}}{\mathbb{E}} \bigg[  \nabla_{\theta}log \pi_{\theta}(a_{t}|s_{t}) \cdot \sum_{t'=0}^{T}R_{t} \bigg] \\ &= \sum_{t=0}^{\tau} \underset{\tau \sim \pi_{\theta}}{\mathbb{E}} \bigg[\nabla_{\theta}log \pi_{\theta}(a_{t}|s_{t})  \bigg[\sum_{t'=0}^{t-1}R_{t} + \sum_{t'=t}^{T} R_{t}\bigg]\bigg]\\&= \sum_{t=0}^{\tau} \bigg[ \underset{\tau \sim \pi_{\theta}}{\mathbb{E}}\bigg[\nabla_{\theta}log \pi_{\theta}(a_{t}|s_{t})  \sum_{t'=0}^{t-1}R_{t} \bigg] + \underset{\tau \sim \pi_{\theta}}{\mathbb{E}}\bigg[\nabla_{\theta}log \pi_{\theta}(a_{t}|s_{t})  \sum_{t'=t}^{T} R_{t}\bigg] \bigg] \\&= \sum_{t=0}^{\tau} \bigg[ \underset{\tau \sim \pi_{\theta}}{\mathbb{E}}\bigg[\nabla_{\theta}log \pi_{\theta}(a_{t}|s_{t}) \bigg] \cdot \underset{\tau \in \pi_{\theta}}{\mathbb{E}}\bigg[ \sum_{t'=0}^{t-1}R_{t} \bigg] + \underset{\tau \sim \pi_{\theta}}{\mathbb{E}}\bigg[\nabla_{\theta}log \pi_{\theta}(a_{t}|s_{t})  \sum_{t'=t}^{T} R_{t}\bigg] \bigg] \\ &\because \text{current action is independtent of previous states} \\&= \sum_{t=0}^{\tau} \bigg[ \underbrace{\underset{\tau \sim \pi_{\theta}}{\mathbb{E}}\bigg[\nabla_{\theta}log \pi_{\theta}(a_{t}|s_{t}) \bigg]}_{= 0 \because \text{grad-log-prob lemma}} \cdot \underset{\tau \in \pi_{\theta}}{\mathbb{E}}\bigg[ \sum_{t'=0}^{t-1}R_{t} \bigg] + \underset{\tau \sim \pi_{\theta}}{\mathbb{E}}\bigg[\nabla_{\theta}log \pi_{\theta}(a_{t}|s_{t})  \sum_{t'=t}^{T} R_{t}\bigg] \bigg]\\ &=\underset{\tau \sim \pi_{\theta}}{E} \bigg[ \sum_{t=0}^{T}\nabla_{\theta} log \pi_{\theta}(a_{t}|s_{t}) \sum_{t'=t}^{T}R_{t} \bigg]  \end{align*} $$
 
 <br>
 
@@ -889,8 +888,22 @@ Most commonly Value function is approximated by a neural network and updated con
 $$\phi_{k} = \underset{\phi}{argmin} \underset{s_{t}, R_{t} \sim \pi_{k}}{E} \bigg[ \bigg( V_{\phi} - \hat{R_{t}}\bigg)^{2}\bigg]$$
 <br>
 
+### Policy Gradient using Q-value Function
 
-### REINFORCE
+
+$$\hat{G}_{t} = \sum_{t' = t}^{T} R_{t}$$
+$$\begin{align*} \nabla_{theta}J(\pi_{\theta}) &= \underset{\tau \sim \pi_{\theta}}{E} \bigg[ \sum_{t=0}^{T}\nabla_{\theta} log \pi_{\theta}(a_{t}|s_{t})\hat{G}_{t}\bigg] \\ &= \sum_{t=0}^{T} \underset{\tau \sim \pi_{\theta}}{E}\bigg[\nabla_{\theta} log \pi_{\theta}(a_{t}|s_{t})\hat{G}_{t}\bigg] \\ &= \sum_{t=0}^{T} \underset{\tau_{:t} \sim \pi_{\theta}}{E}\bigg[ \underset{\tau_{t:}}{\pi_{\theta}}\bigg[\nabla_{\theta}log \pi_{\theta}(a_{t}|s_{t})\hat{G}_{t}|\tau_{:t} \bigg]\bigg] \\ \because &\text{ law of iterated expectations } E[x] = E[E[X|Y]] \\ &= \sum_{t=0}^{T}\underset{\tau_{:t} \sim \pi_{\theta}}{E}\bigg[ \nabla_{\theta} log \pi_{\theta}(a_{t}|s_{t})\underset{\tau_{t:} \sim \pi_{\theta}}{E} \bigg[ \hat{G}_{t}| \tau_{:t} \bigg]\bigg] \\ &\underset{\tau_{t:} \sim \pi_{\theta}}{E} [ \hat{G}_{t}| \tau_{:t} ] = \underset{\tau_{:t}\sim \pi_{\theta}}{E} [\hat{G}_{t} | s_{t}, a_{t}] = Q^{\pi_{\theta}}(s_{t},a_{t}), \because \text{ markov property} \\ &= \sum_{t=0}^{T}\underset{\tau_{:t} \sim \pi_{\theta}}{E}\bigg[ \nabla_{\theta} log \pi_{\theta}(a_{t}|s_{t})Q^{\pi_{\theta}}(s_{t}, a_{t})\bigg]  \end{align*}$$
+
+<br>
+
+### Policy Gradient Using Advantage Function
+
+$$\hat{A}_{t} = Q^{\pi_{\theta}}(s_{t}, a_{t}) - V^{\pi_{\theta}}(s_{t})$$
+
+$$ \nabla_{\theta}J(\pi_{\theta}) = \underset{\tau \sim \pi_{\theta}}{E} \bigg[ \sum_{t=0}^{T}\nabla_{\theta} log \pi_{\theta}(a_{t}|s_{t})\hat{A}_{t}\bigg]$$
+
+
+### Vanilla Policy Gradient
 
 > Initialize $\theta$ <br>
 > for each episode { <br>
